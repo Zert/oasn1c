@@ -1,0 +1,27 @@
+EltexSP DEFINITIONS ::=
+
+BEGIN
+
+IMPORTS
+	PlainProfile, PlainConfig FROM CommonProfile
+	DeviceType, Protocol FROM CommonTypes;
+
+
+-- Comments --
+
+/*
+Multline Comments
+*/
+
+SPMessage ::= SEQUENCE
+{
+  version           Version,
+  code              Code,
+  ...
+}
+
+Version ::= INTEGER
+
+Code ::= INTEGER(0..88)
+
+END
