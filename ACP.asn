@@ -1,0 +1,246 @@
+-- Adapter interaction protocol
+
+ACP
+DEFINITIONS IMPLICIT TAGS ::=
+BEGIN
+
+EXPORTS Message, CallData;
+
+IMPORTS
+	CallFlag, CallRef, InfoDirection, AddressEndType,
+	CallProgressType, FailureType, NetworkSRType,
+	ReleaseType, ServiceFeatureType, SetupCRType,
+	SetupIRType, SubsequentAddressType,
+	UserDataType FROM INCS3Internals;
+
+-- Top level message structure for interaction with adapters
+Message ::= SEQUENCE
+{
+  version                   [0] INTEGER(0..99) DEFAULT 1,
+  body                      [1] Body,
+  ...
+}
+
+Body ::= CHOICE
+{
+  callData               [0] CallData,
+  registration           [1] Registration,
+  error                  [2] ErrorDescriptor,
+  mediaData              [3] MediaData,
+  ...
+}
+
+Registration ::= CHOICE
+{
+  request           [0] RegRequest,
+  reply             [1] RegReply
+}
+
+RegRequest ::= SEQUENCE
+{
+  ident             [0] OCTET STRING,
+  reason            [1] RegReason DEFAULT restart,
+  ...
+}
+
+RegReply ::= SEQUENCE
+{
+  ident             [0] OCTET STRING,
+  result            [1] RegResult,
+  ...
+}
+
+RegReason ::= ENUMERATED
+{
+  restart(0),
+  reconnect(1),
+  ...
+}
+
+RegResult ::= CHOICE
+{
+  error                      [0] ErrorDescriptor,
+  params                     [1] RegParams
+}
+
+RegParams ::= SEQUENCE
+{
+  name           [0] Name OPTIONAL,
+  nodeType       [1] NodeType,
+  ...
+}
+
+NodeType ::= ENUMERATED
+{
+  paMegaco(0),
+  agMegaco(1),
+  mgMegaco(2),
+  paMgcp(3),
+  agMgcp(4),
+  mgMgcp(5),
+  paSipt(6),
+  ...
+}
+
+Name ::= IA5String(SIZE (1..64))
+
+ErrorDescriptor ::= SEQUENCE
+{
+  reason            [0] ErrorReason,
+  text              [1] ErrorText OPTIONAL
+}
+
+ErrorReason ::= ENUMERATED
+{
+  ok(0),
+  syntaxError(1),
+  internalError(2),
+  notImplemented(3),
+  unauthorized(4),
+  authorizationError(5),
+  notFound(6),
+  ...
+}
+
+Text ::= IA5String
+ErrorText ::= Text
+
+CallData ::= SEQUENCE
+{
+  endpoint          [0] EpName,
+  event             [1] CallEvent,
+  ...
+}
+
+CallEvent ::= CHOICE
+{
+  user               [0]  UserDataType,
+  setupInd           [1]  SetupIRType,
+  setupReq           [2]  SetupIRType,
+  setupConf          [3]  SetupCRType,
+  setupResp          [4]  SetupCRType,
+  progress           [5]  CallProgressType,
+  subsequent         [6]  SubsequentAddressType,
+  release            [7]  ReleaseType,
+  addressEnd         [8]  AddressEndType,
+  service            [9]  ServiceFeatureType,
+  failure            [10] FailureType,
+  ...
+}
+
+-- EpName ::= SEQUENCE
+-- {
+--   subnode         [1] OCTET STRING(SIZE(1..64)),
+--   port            [2] OCTET STRING(SIZE(1..64))
+-- }
+
+EpName ::= OCTET STRING(SIZE(1..64))
+
+MediaData ::= SEQUENCE
+{
+  endpoint          [0] EpName,
+  mediaEvent        [1] MediaEvent,
+  ...
+}
+
+MediaEvent ::= CHOICE
+{
+  portStatusInd      [0] PortStatusType,
+  acquireSDPReq      [1] AcquireSDPReqType,
+  acquireSDPResp     [2] AcquireSDPRespType,
+  getSDPReq          [3] GetSDPReqType,
+  getSDPResp         [4] GetSDPRespType,
+  throughconnect     [5] ThroughconnectType,
+  changeMediaReq     [6] ChangeMediaReqType,
+  changeMediaResp    [7] ChangeMediaRespType,
+  gateRegisterReq    [8] NULL,
+  gateRegisterResp   [9] BOOLEAN,
+  gateUnregister     [10] NULL,
+  portEventInd       [11] PortEventType,
+  ...
+}
+
+PortStatusType ::= ENUMERATED
+{
+  offhook(0),
+  allocated(1),
+  onhook(2),
+  ...
+}
+
+AcquireSDPReqType ::= SEQUENCE
+{
+  sessionID          [0] UTF8String,
+  ...
+}
+
+AcquireSDPRespType ::= SEQUENCE
+{
+  sdp                [0] SDPType,
+  ...
+}
+
+GetSDPReqType ::= CHOICE
+{
+  local              [0] NULL,
+  remote             [1] NULL,
+  ...
+}
+
+GetSDPRespType ::= CHOICE
+{
+  sdp                [0] SDPType,
+  error              [1] NULL,
+  ...
+}
+
+SDPType ::= SET OF SDPEntry
+
+SDPEntry ::= SEQUENCE {name UTF8String, value UTF8String}
+
+ThroughconnectType ::= SEQUENCE
+{
+  sessionID          [0] UTF8String,
+  localSDP           [1] SDPType,
+  remoteSDP          [2] SDPType,
+  mode               [3] MediaMode,
+  ...
+}
+
+MediaMode ::= ENUMERATED
+{
+  sendOnly(0),
+  recvOnly(1),
+  sendRecv(2),
+  inactive(3),
+  loopBack(4),
+  ...
+}
+
+ChangeMediaReqType ::= SEQUENCE
+{
+  sdp               [0] SDPType,
+  ...
+}
+
+ChangeMediaRespType ::= CHOICE
+{
+  ok                [0] NULL,
+  fail              [1] ChangeMediaFailType,
+  ...
+}
+
+ChangeMediaFailType ::= SEQUENCE
+{
+  reason            [0] UTF8String,
+  ...
+}
+
+PortEventType ::= ENUMERATED
+{
+  voice(0),
+  fax(1),
+
+  ...
+}
+END

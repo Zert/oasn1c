@@ -1,11 +1,11 @@
-EltexSP DEFINITIONS ::=
+DummySP DEFINITIONS ::=
 
 BEGIN
+
 
 IMPORTS
 	PlainProfile, PlainConfig FROM CommonProfile
 	DeviceType, Protocol FROM CommonTypes;
-
 
 -- Comments --
 

@@ -1,0 +1,46 @@
+DummySP DEFINITIONS ::=
+
+
+BEGIN
+
+IMPORTS
+	PlainProfile, PlainConfig FROM CommonProfile;
+
+
+Test ::= CHOICE {
+  asd [0] INTEGER,
+  qwe AbcType
+}
+
+TestSeq ::= SEQUENCE {
+  asd INTEGER,
+  qwe [1] AbcType,
+  ...
+}
+
+SPMessage ::= ENUMERATED {
+  asd(0),
+  qwe(1),
+  ...
+}
+
+Value ::= INTEGER
+
+Code ::= INTEGER(0..88)
+
+/*
+
+
+
+
+
+
+
+
+*/
+
+
+Name ::= IA5String(SIZE (1..64))
+
+
+END
