@@ -1,12 +1,13 @@
 OCAMLMAKEFILE = OCamlMakefile
 
-AUXLIB_DIRS  = /usr/lib/ocaml/site-packages/deriving/lib
-OCAMLOPT     = ocamlopt.opt
-OCAMLC       = ocamlc.opt
-OCAMLDEP     = ocamldep
-PATH        := $(PATH):/usr/lib/ocaml/site-packages/deriving/syntax
+AUXLIB_DIRS	= /usr/lib/ocaml/site-packages/deriving/lib
+OCAMLOPT	= ocamlopt.opt
+OCAMLC		= ocamlc.opt
+OCAMLDEP	= ocamldep
+PATH		:= $(PATH):/usr/lib/ocaml/site-packages/deriving/syntax
 
-OCAMLFLAGS   = -w Aef
+OCAMLFLAGS	= -w Aef
+YFLAGS		= -v
 
 SOURCES = asn_lex.mll \
           asn_parse.mly \

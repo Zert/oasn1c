@@ -132,39 +132,41 @@ let rvbrack = "]]"
   rule token = parse
 	  whitespace +              { (token lexbuf) }
 	| "--"                      { comment lexbuf }
-	| '-'                       { db "Minus" MINUS }
+	| '-'                       { db "MINUS" MINUS }
 	| "/*"                      { mlcomment lexbuf }
-	| assign                    { db "Defn" DEFN }
+	| assign                    { db "DEFN" DEFN }
 	| typereference as t        { try
 									db ("KW: " ^  (Lexing.lexeme lexbuf)) (Hashtbl.find keyword_table t)
 								  with Not_found ->
-									db ("String: " ^ (Lexing.lexeme lexbuf))  (NAME t) }
-	| identifier as i           { db ("Ident: " ^ (Lexing.lexeme lexbuf)) (IDENT i) }
-	| number as n               { db ("Number: " ^ (Lexing.lexeme lexbuf)) (NUMBER (int_of_string n)) }
-	| realnumber as r           { db ("RealNumber: " ^ (Lexing.lexeme lexbuf)) (REALNUMBER (float_of_string r)) }
-	| bstring as b              { db ("BString: " ^ (Lexing.lexeme lexbuf)) (BSTRING b) }
-	| hstring as h              { db ("HString: " ^ (Lexing.lexeme lexbuf)) (HSTRING h) }
-	| cstring as c              { db ("CString: " ^ (Lexing.lexeme lexbuf)) (CSTRING c) }
-	| '{'                       { db "LBrace" LBRACE }
-	| '}'                       { db "RBrace" RBRACE }
-	| '['                       { db "LSQBrace" LSQBRACE }
-	| ']'                       { db "RSQBrace" RSQBRACE }
-	| ':'                       { db "Colon" COLON }
-	| ';'                       { db "Semi" SEMICOLON }
-	| ','                       { db "Comma" COMMA }
+									db ("NAME: " ^ (Lexing.lexeme lexbuf))  (NAME t) }
+	| identifier as i           { db ("IDENT: " ^ (Lexing.lexeme lexbuf)) (IDENT i) }
+	| number as n               { db ("NUMBER: " ^ (Lexing.lexeme lexbuf)) (NUMBER (int_of_string n)) }
+	| realnumber as r           { db ("REALNUMBER: " ^ (Lexing.lexeme lexbuf)) (REALNUMBER (float_of_string r)) }
+	| bstring as b              { db ("BSTRING: " ^ (Lexing.lexeme lexbuf)) (BSTRING b) }
+	| hstring as h              { db ("HSTRING: " ^ (Lexing.lexeme lexbuf)) (HSTRING h) }
+	| cstring as c              { db ("CSTRING: " ^ (Lexing.lexeme lexbuf)) (CSTRING c) }
+	| '{'                       { db "LBRACE" LBRACE }
+	| '}'                       { db "RBRACE" RBRACE }
+	| '['                       { db "LSQBRACE" LSQBRACE }
+	| ']'                       { db "RSQBRACE" RSQBRACE }
+	| ':'                       { db "COLON" COLON }
+	| ';'                       { db "SEMICOLON" SEMICOLON }
+	| ','                       { db "COMMA" COMMA }
 	| '<'                       { db "LT" LT }
+	| '>'                       { db "GT" GT }
 	| '@'                       { db "AT" AT }
-	| '*'                       { db "Star" STAR }
-	| '.'                       { db "Dot" DOT }
-	| '(' (digit+ as r1) rangesep (digit+ as r2) ')'   { db "Range" (RANGE ((int_of_string r1), (int_of_string r2))) }
-	| '('                       { db "LParen" LPAREN }
-	| ')'                       { db "RParen" RPAREN }
-	| "[["                      { db "LDSQBrace" LDSQBRACE }
-	| "]]"                      { db "RDSQBrace" RDSQBRACE }
-	| '!'                       { db "Exclam" EXCLAM }
-	| ellipsis                  { db "Dots" DOTS }
+	| '*'                       { db "STAR" STAR }
+	| '.'                       { db "DOT" DOT }
+	| '(' (digit+ as r1) rangesep (digit+ as r2) ')'   { db "RANGE" (RANGE ((int_of_string r1), (int_of_string r2))) }
+	| rangesep                  { db "Rangesep" RANGESEP }
+	| '('                       { db "LPAREN" LPAREN }
+	| ')'                       { db "RPAREN" RPAREN }
+	| "[["                      { db "LDSQBRACE" LDSQBRACE }
+	| "]]"                      { db "RDSQBRACE" RDSQBRACE }
+	| '!'                       { db "EXCLAM" EXCLAM }
+	| ellipsis                  { db "DOTS" DOTS }
 	| eof                       { raise Eof }
-	| _ as r                    { Printf.printf "Rest: %c\n" r; raise Eof }
+(*	| _ as c                    { print_char c; () } *)
   and comment = parse
 	  "--"                      { token lexbuf }
 	| '\n'                      { token lexbuf }
