@@ -2,4 +2,4 @@
 /asn_parse.ml
 /asn_parse.mli
 /*.output
-/oa_main
+/oa_ast_main
