@@ -1,5 +1,3 @@
-OCAMLMAKEFILE = ../OCamlMakefile
-
 AUXLIB_DIRS	= /usr/lib/ocaml/site-packages/deriving/lib
 OCAMLOPT	= ocamlopt.opt
 OCAMLC		= ocamlc.opt
@@ -12,16 +10,20 @@ YFLAGS		= -v
 SOURCES = asn_lex.mll \
           asn_parse.mly \
           oa_asn.ml \
+          oa_ast.ml \
           oa_main.ml
 
 LIBS    = nums deriving
-RESULT  = oa_ast_main
+LIB_NAME	= oa_ast
+RESULT  = ${LIB_NAME}
 CLIBS 	=
 
 INCDIRS = $(AUXLIB_DIRS)
 LIBDIRS = $(AUXLIB_DIRS)
 
-all: quirks byte-code
+TRASH	= *~ *.cma ${RESULT}
+
+all: quirks byte-code ${RESULT}.cma
 
 quirks: oa_asn.cmi asn_parse.cmi
 

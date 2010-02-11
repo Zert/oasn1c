@@ -8,7 +8,7 @@ type asn =
 	Main of (asn * asn * asn * asn)
   | Body of (asn * asn * asn list)
   | Name of string
-  | Number of int
+  | Number of ( int64 )
   | AbsRef of ( string * asn )
   | All
   | AlternativeType of ( asn list )
@@ -27,7 +27,7 @@ type asn =
   | CharSyms of ( asn list )
   | ChoiceType of ( asn )
   | ChoiceValue of ( string * asn )
-  | ClassNumber of ( int )
+  | ClassNumber of ( int64 )
   | ClassNumberDef of ( asn )
   | ComponentTypeListsExcept
   | ComponentTypeLists of ( asn list )
@@ -53,7 +53,7 @@ type asn =
   | ExportAll
   | Exports of ( asn )
   | ExtensImpl
-  | ExtensionAdditionGroup of ( int * asn list )
+  | ExtensionAdditionGroup of ( int64 * asn list )
   | ExtensionAddition of ( asn )
   | ExtensionAdditions of ( asn list )
   | ExtensionAndException of ( asn )
@@ -69,8 +69,9 @@ type asn =
   | IA5String
   | ImplicitTags
   | Imports of ( asn list )
+  | Integer of ( int64 )
   | IntegerType of ( asn )
-  | IntegerValueInt of ( int )
+  | IntegerValueInt of ( int64 )
   | IntegerValueStr of ( string )
   | ISO646String
   | ItemidCompid of ( asn * asn )
@@ -81,9 +82,9 @@ type asn =
   | MinusInfinity
   | ModType of ( asn * string )
   | Module of ( string )
-  | NamedBitInt of ( string * int )
+  | NamedBitInt of ( string * int64 )
   | NamedBitDef of ( string * asn )
-  | NamedNumberInt of ( string * int )
+  | NamedNumberInt of ( string * int64 )
   | NamedNumberDef of ( string * asn )
   | NamedNumberList of ( asn list )
   | NamedTaggedType of ( string * asn )
@@ -115,8 +116,8 @@ type asn =
   | ParamValueSetTypeAssign of ( asn * asn * asn * asn )
   | PlusInfinity
   | PrintableString
-  | Quadruple of ( int * int * int * int )
-  | Range of ( int * int )
+  | Quadruple of ( int64 * int64 * int64 * int64 )
+  | Range of ( int64 * int64 )
   | RealType
   | Real of ( float )
   | Ref of ( string )
@@ -135,7 +136,7 @@ type asn =
   | SetOfConstraint of ( asn * asn )
   | SetOfValue of ( asn list )
   | SetValue of ( asn list )
-  | SignedNumber of ( int )
+  | SignedNumber of ( int64 )
   | Size of asn
   | String of asn * asn
   | Symbols of ( asn list )
@@ -149,7 +150,7 @@ type asn =
   | TagImplType of ( asn * asn )
   | TagType of ( asn * asn )
   | TeletexString
-  | Tuple of ( int * int )
+  | Tuple of ( int64 * int64 )
   | TypeAssign of ( asn * asn )
   | TypeBitString of ( asn )
   | TypeBoolean of ( asn )

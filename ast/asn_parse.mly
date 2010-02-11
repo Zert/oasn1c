@@ -7,7 +7,7 @@
 	  ret
 	end;;
 
-  let  parse_error s =
+  let parse_error s =
 	print_endline "Parse error";
 	print_endline s;
 	flush stdout;;
@@ -29,9 +29,9 @@ valuereference - IDENT
 %token <string> BSTRING
 %token <string> HSTRING
 %token <string> CSTRING
-%token <int> NUMBER
+%token <int64> NUMBER
 %token <float> REALNUMBER
-%token <int * int> RANGE
+%token <int64 * int64> RANGE
 
 /* Reserved words */
 %token ABSENT ABSTRACT_SYNTAX ALL APPLICATION AUTOMATIC BEGIN BIT BMPString BOOLEAN BY
@@ -252,6 +252,7 @@ asn_type_with_constraint:
 | SET OF asn_type                          { SetOfConstraint (Empty, $3) }
 | SEQUENCE asn_constraint OF asn_type      { SequenceOfConstraint ($2, $4) }
 | SEQUENCE size_constraint OF asn_type     { SequenceOfConstraint ($2, $4) }
+| SEQUENCE OF asn_type                     { SequenceOfConstraint (Empty, $3) }
 ;
 asn_constraint:
   LPAREN constraint_spec RPAREN                   { Constraint ($2, Empty) }
@@ -266,8 +267,8 @@ subtype_constraint:
   element_set_spec { $1 }
 ;
 size_constraint:
-/*  SIZE asn_constraint         { ConstraintSize ($2) } FIXME */
-  SIZE value_range              { ConstraintSize ($2) }
+/*  SIZE asn_constraint         { ConstraintSize ($2) } */
+| SIZE value_range            { ConstraintSize ($2) }
 ;
 value_range:
   lower_endpoint RANGESEP upper_endpoint   { ValueRange ($1, $3) }
@@ -400,8 +401,8 @@ builtin_type:
 /*| instance_of_type          { TypeInstanceOf ($1) }*/
 | integer_type              { TypeInteger ($1) }
 | null_type                 { TypeNull ($1) }
-/*| object_class_field_type   { TypeObjClassField ($1) }
-| object_identifier_type    { TypeObjIdent ($1) } */
+/*| object_class_field_type   { TypeObjClassField ($1) }*/
+| object_identifier_type    { TypeObjIdent ($1) }
 | octet_string_type         { TypeOctetString ($1) }
 | real_type                 { TypeReal ($1) }
 /*| relative_oid_type         { TypeRelativeOid ($1) }*/
@@ -413,7 +414,7 @@ builtin_type:
 ;
 bit_string_type:
   BIT STRING                { BitStringValL ([]) }
-| BIT STRING LPAREN named_bit_list RPAREN { BitStringValL ($4) }
+| BIT STRING LBRACE named_bit_list RBRACE { BitStringValL ($4) }
 ;
 named_bit_list:
   named_bit                       { [$1] }
@@ -429,8 +430,10 @@ boolean_type:
 character_string_type:
   restricted_character_string_type    { String ($1, Empty) }
 | restricted_character_string_type LPAREN SIZE RANGE RPAREN    { String ($1, Size (Range($4))) }
+| restricted_character_string_type LPAREN SIZE LPAREN NUMBER RPAREN RPAREN    { String ($1, Size (Integer($5))) }
 | unrestricted_character_string_type  { String ($1, Empty) }
 | unrestricted_character_string_type LPAREN SIZE RANGE RPAREN    { String ($1, Size (Range($4))) }
+| unrestricted_character_string_type LPAREN SIZE LPAREN NUMBER RPAREN RPAREN    { String ($1, Size (Integer($5))) }
 ;
 restricted_character_string_type:
   BMPString              { BMPString }
@@ -507,13 +510,14 @@ named_number:
 ;
 signed_number:
   NUMBER                 { $1 }
-| MINUS NUMBER           { -($2) }
+| MINUS NUMBER           { Int64.neg($2) }
 null_type:
   NULL                   { NullType }
 ;
 octet_string_type:
   OCTET STRING                           { OctetStringType (Empty) }
 | OCTET STRING LPAREN SIZE RANGE RPAREN  { OctetStringType (Size (Range($5))) }
+| OCTET STRING LPAREN SIZE LPAREN NUMBER RPAREN RPAREN  { OctetStringType (Size (Integer($6))) }
 ;
 real_type:
   REAL                   { RealType }
@@ -524,7 +528,9 @@ sequence_type:
 | SEQUENCE LBRACE extension_and_exception
 	  optional_extension_marker RBRACE         { SequenceTypeExt ($3, $4) }
 ;
-
+object_identifier_type:
+  OBJECT IDENTIFIER               { Empty } /* FIXME */
+;
 
 component_type_lists:
   component_type_list                                       { ComponentTypeLists ($1) }
@@ -569,7 +575,7 @@ extension_addition_group:
 ;
 optional_extension_marker:      { Empty }
 | COMMA DOTS                    { ExtensionMarker }
-version_number: { 0 }
+version_number: { (0L) }
 | NUMBER COLON  { $1 }
 ;
 component_type_list:
@@ -597,7 +603,7 @@ named_tagged_type:
 asn_value:
   builtin_value             { BuiltinVal ($1) }
 | referenced_value          { RefVal ($1) }
-/* | object_class_field_value  { ObjClassFieldVal ($1) } */
+/*| object_class_field_value  { ObjClassFieldVal ($1) }*/
 ;
 
 builtin_value:
@@ -611,7 +617,7 @@ builtin_value:
 /*| instance_of_value         { ValueInstanceOf ($1) }*/
 | integer_value             { ValueInteger ($1) }
 | null_value                { ValueNull ($1) }
-/* | object_identifier_value   { ValueObjIdent ($1) } */
+| object_identifier_value   { ValueObjIdent ($1) }
 | octet_string_value        { ValueOctetString ($1) }
 | real_value                { ValueReal ($1) }
 /*| relative_oid_value        { ValueRelativeOid ($1) }*/

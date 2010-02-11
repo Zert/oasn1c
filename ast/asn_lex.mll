@@ -9,6 +9,8 @@
 
   exception Error of error * position;;
 
+  let string_to_int str = Scanf.sscanf str "%Ld" (fun x->x)
+
   let keyword_table = Hashtbl.create 10
   let _ =
     List.iter (fun (kwd, tok) -> Hashtbl.add keyword_table kwd tok)
@@ -140,7 +142,7 @@ let rvbrack = "]]"
 								  with Not_found ->
 									db ("NAME: " ^ (Lexing.lexeme lexbuf))  (NAME t) }
 	| identifier as i           { db ("IDENT: " ^ (Lexing.lexeme lexbuf)) (IDENT i) }
-	| number as n               { db ("NUMBER: " ^ (Lexing.lexeme lexbuf)) (NUMBER (int_of_string n)) }
+	| number as n               { db ("NUMBER: " ^ (Lexing.lexeme lexbuf)) (NUMBER (string_to_int n)) }
 	| realnumber as r           { db ("REALNUMBER: " ^ (Lexing.lexeme lexbuf)) (REALNUMBER (float_of_string r)) }
 	| bstring as b              { db ("BSTRING: " ^ (Lexing.lexeme lexbuf)) (BSTRING b) }
 	| hstring as h              { db ("HSTRING: " ^ (Lexing.lexeme lexbuf)) (HSTRING h) }
@@ -157,7 +159,7 @@ let rvbrack = "]]"
 	| '@'                       { db "AT" AT }
 	| '*'                       { db "STAR" STAR }
 	| '.'                       { db "DOT" DOT }
-	| '(' (digit+ as r1) rangesep (digit+ as r2) ')'   { db "RANGE" (RANGE ((int_of_string r1), (int_of_string r2))) }
+	| '(' (digit+ as r1) rangesep (digit+ as r2) ')'   { db "RANGE" (RANGE ((string_to_int r1), (string_to_int r2))) }
 	| rangesep                  { db "Rangesep" RANGESEP }
 	| '('                       { db "LPAREN" LPAREN }
 	| ')'                       { db "RPAREN" RPAREN }
