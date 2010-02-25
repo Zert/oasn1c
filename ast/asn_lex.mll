@@ -111,11 +111,11 @@ let digit = ['0'-'9']
 let hyphen = '-'
 let ordsym = (uppercase|lowercase|digit)
 
-let whitespace = ['\t' '\n' '\013' '\014' '\r' ' ']
-let newline = ['\n' '\013' '\014' '\r']
+let whitespace = ['\t' ' ']
+let newline = ("\r\n" | ['\n' '\013' '\014' '\r'])
 
-let typereference = (uppercase (ordsym|hyphen)* ordsym*)
-let identifier = (lowercase (ordsym|hyphen) ordsym*)
+let typereference = ( uppercase (ordsym|hyphen)* ordsym* )
+let identifier = ( lowercase (ordsym|hyphen) ordsym* )
 let valuereference = identifier
 let modulereference = typereference
 let number = ('0'|(['1'-'9']digit*))
@@ -133,6 +133,7 @@ let rvbrack = "]]"
 
   rule token = parse
 	  whitespace +              { (token lexbuf) }
+	| newline                   { new_line lexbuf; token lexbuf }
 	| "--"                      { comment lexbuf }
 	| '-'                       { db "MINUS" MINUS }
 	| "/*"                      { mlcomment lexbuf }
@@ -171,8 +172,9 @@ let rvbrack = "]]"
 (*	| _ as c                    { print_char c; () } *)
   and comment = parse
 	  "--"                      { token lexbuf }
-	| '\n'                      { token lexbuf }
+	| newline                   { new_line lexbuf; token lexbuf }
 	| _                         { comment lexbuf }
   and mlcomment = parse
 	  "*/"                      { token lexbuf }
+	| newline                   { new_line lexbuf; mlcomment lexbuf }
 	| _                         { mlcomment lexbuf }
