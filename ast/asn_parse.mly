@@ -1,5 +1,8 @@
 %{
   open Oa_asn;;
+  open Lexing;;
+
+  exception ParsingError of int;;
 
   let db str ret =
 	begin
@@ -12,6 +15,16 @@
 	print_endline s;
 	flush stdout;;
 
+  let where_is_error env = Printf.fprintf stderr "Parser env\n";;
+
+  let error_handler expl =
+	let sp = Parsing.symbol_start_pos () in
+	let ep = Parsing.symbol_end_pos () in
+	  begin
+		let fname = if sp.pos_fname = "" then "<stdin>" else sp.pos_fname in
+		  Printf.fprintf stderr "%s:%d:%d-%d error: %s\n" fname sp.pos_lnum (sp.pos_cnum - sp.pos_bol) (ep.pos_cnum - ep.pos_bol) expl;
+		  raise (ParsingError(Parsing.symbol_start ()))
+	  end
 
 %}
 
@@ -76,6 +89,7 @@ def_objid_comp:
 ;
 name_form:
   IDENT                               { Name ($1) }
+| error { error_handler "Incorrect name form" }
 ;
 number_form:
   NUMBER                              { Number ($1) }
@@ -98,6 +112,7 @@ extension_default:
 module_body:
   /* empty */           { Empty }
 | exports imports assignment_list  {Body ($1, $2, $3) }
+| error                     { error_handler "Incorrect body" }
 ;
 exports:
   /* empty */                 { Exports (Empty) }
@@ -143,6 +158,7 @@ defined_type:
 | NAME                            { TypeRef ($1) }
 /*| parameterized_type              { ParamType ($1) }
 | parameterized_value_set_type    { ParamValSetType ($1) }*/
+| error                           { error_handler "Incorrect defined type" }
 ;
 
 /*
@@ -166,6 +182,7 @@ objid_components:
 ;
 module_reference:
   NAME                 { Module ($1) }
+| error                { error_handler "Incorrect module reference format" }
 ;
 value_reference:
   IDENT                { Value ($1) }
@@ -188,6 +205,7 @@ symbol_list:
 symbol:
   NAME              { Ref ($1) }
 /* | parametrized_reference { ParamRef ($1) } */
+| error                { error_handler "Incorrect symbol" }
 ;
 assignment_list:
   assignment                 { [$1] }
@@ -202,6 +220,7 @@ assignment:
 | object_assignment           { ObjAssign ($1) }
 | object_set_assignment       { ObjSetAssign ($1) } */
 /*| parameterized_assignment    { ParamAssign ($1) }*/
+| error                     { error_handler "Incorrect assignment" }
 ;
 
 /* FIXME
@@ -211,6 +230,7 @@ type_assignment:
 */
 type_assignment:
   NAME DEFN asn_type          { TypeAssign (TypeRef($1), $3) }
+| error                       { error_handler "Bad assignment" }
 ;
 
 value_assignment:
@@ -219,6 +239,7 @@ value_assignment:
 value_set_type_assignment:
   NAME asn_type DEFN value_set            { ValueSetTypeAssign ($1, $2, $4) }
 | NAME DEFN asn_type value_set            { ValueSetTypeAssign ($1, $3, $4) }
+| error                { error_handler "Incorrect value set type assignment" }
 ;
 value_set:
   LPAREN element_set_spec RPAREN          { ValueSet ($2) }
@@ -377,6 +398,7 @@ referenced_type:
 | selection_type           { RefTypeSelection ($1) }
 /* | type_from_object         { RefTypeFromObj ($1) } */
 /* | value_set_from_objects   { RefTypeValSetFromObj ($1) } */
+| error                { error_handler "Incorrect referenced type" }
 ;
 /*
 useful_type:
@@ -411,6 +433,7 @@ builtin_type:
 | set_type                  { TypeSet ($1) }
 | set_of_type               { TypeSetOf ($1) }
 | tagged_type               { TypeTagged ($1) }*/
+| error { error_handler "Bad type definition" }
 ;
 bit_string_type:
   BIT STRING                { BitStringValL ([]) }
@@ -595,9 +618,11 @@ component_type:
 
 named_type:
   IDENT asn_type            { NamedType ($1, $2) }
+| error                     { error_handler "Bad named type" }
 ;
 named_tagged_type:
   IDENT tagged_type         { NamedTaggedType ($1, $2) }
+| error                     { error_handler "Bad named tagged type" }
 ;
 
 asn_value:
