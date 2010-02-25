@@ -1,0 +1,90 @@
+ACPdatatypes
+
+DEFINITIONS IMPLICIT TAGS ::=
+BEGIN
+
+-- CalledPartyNumber structure according Q.2763
+ACPCalledPartyNumber ::= SEQUENCE {
+  nai        [0] NAIType,       -- Nature of address indicator
+  inni       [1] INNIType,      -- Internal network number indicator
+  npi        [2] NPIType,       -- Numbering plan indicator
+  digits     [3] OCTET STRING (SIZE (minCalledPartyNumberLength..maxCalledPartyNumberLength)) -- Number digits
+}
+
+-- CallingPartyNumber structure according Q.2763
+ACPCallingPartyNumber ::= SEQUENCE {
+  nai        [0] NAIType,       -- Nature of address indicator
+  incomplete [1] BOOLEAN,       -- Calling party number incomplete indicator (false - complete, true - incomplete)
+  npi        [2] NPIType,       -- Numbering plan indicator
+  apri       [3] ARPIType,      -- Address presentation restricted indicator
+  screening  [4] ScreeningType, -- Screening indicator
+  digits     [5] OCTET STRING (SIZE (minCallingPartyNumberLength..maxCallingPartyNumberLength)) -- Number digits
+}
+
+ACPCallingPartysCategory ::= ENUMERATED {
+  unknownAtThisType(0),       -- Calling party's category unknow at this time (national use)
+  operatorFrench(1),          -- Operator, French language
+  operatorEngish(2),          -- Operator, English language
+  operatorGerman(3),          -- Operator, German language
+  operatorRussian(4),         -- Operator, Russian language
+  operatorSpanish(5),         -- Operator, Spanish language
+  reserved(9),                -- Reserved (see ITU-T Q.104) (national use) (may be used as natinal operator)
+  ordinarySubscriber(10),     -- Ordinary calling subscriber
+  subscriberWithPriority(11), -- Calling subsciber with priority
+  dataCall(12),               -- Data call (voice band data)
+  testCall(13),               -- Test call
+  spare(14),                  -- Spare
+  payphone(15)                -- Payphone
+}
+
+-- Nature of address indicator
+NAIType ::= ENUMERATED {
+  spare(0),
+  subsriberNumber(1), -- national use
+  unknown(2),         -- national use
+  nationalNumber(3),  -- national use
+  internationNumber(4)
+}
+
+-- Internal network number indicator
+INNIType ::= ENUMERATED {
+  routingToInternalNumberAllowed(0),
+  routingToInternalNumberNotAllowed(1)
+}
+
+-- Numbering plan indicator
+NPIType ::= ENUMERATED {
+  spare(0),
+  isdnTelephony(1), -- E.164
+  reserved1(3),     -- reserved for national use
+  reserved2(4),     -- reserved for national use
+  reserved3(5)      -- reserved for national use
+}
+
+-- Address presentation restricted indicator
+ARPIType ::= ENUMERATED {
+  presentationAllowed(0),
+  presentationRestricted(1),
+  addressNotAvailable(2), -- national use, subfields NAI, incomplete, NP must be coded as 0's
+  spare(3)
+}
+
+-- Screening indicator
+ScreeningType ::= ENUMERATED {
+  userProvidedNotVerified(0),
+  userProvidedVerifiedAndPassed(1),
+  userProvidedVerifiedAndFailed(2),
+  networkProvided(3)
+}
+
+
+
+
+
+minCalledPartyNumberLength	INTEGER ::= 1	-- example value
+maxCalledPartyNumberLength	INTEGER ::= 27
+
+minCallingPartyNumberLength	INTEGER ::= 1	-- example value
+maxCallingPartyNumberLength	INTEGER ::= 27
+
+END

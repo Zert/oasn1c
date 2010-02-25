@@ -1,0 +1,29 @@
+CommonProfile DEFINITIONS AUTOMATIC TAGS ::=
+
+BEGIN
+
+IMPORTS
+	DeviceType FROM CommonTypes;
+
+PlainProfile ::= SEQUENCE
+{
+  id          ProfileID OPTIONAL,
+  type        DeviceType OPTIONAL,
+  name        IA5String(SIZE (1..64)) OPTIONAL,
+  config      PlainConfig OPTIONAL
+}
+
+PlainConfig ::= SEQUENCE OF ConfigItem
+
+ConfigItem ::= SEQUENCE
+{
+  name       ConfigName,
+  value      ConfigValue
+}
+
+ConfigName ::= IA5String(SIZE (1..64))
+ConfigValue ::= IA5String
+
+ProfileID ::= INTEGER(0..4294967295)
+
+END

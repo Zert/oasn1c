@@ -1,0 +1,25 @@
+CommonTypes DEFINITIONS AUTOMATIC TAGS ::=
+
+BEGIN
+
+DeviceType ::= ENUMERATED
+{
+  unknown(0),
+  controller(1),
+  gateway(2),
+  endpoint(3),
+  user(4),
+  ...
+}
+
+Protocol ::= ENUMERATED
+{
+  megaco(0),
+  mgcp(1),
+  sip(2),
+  sipt(3),
+  h323(4),
+  ...
+}
+
+END
