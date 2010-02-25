@@ -9,8 +9,11 @@ IMPORTS
 
 Test ::= CHOICE {
   asd [0] INTEGER,
-  qwe AbcType
+  qwe AbcType,
+  eee HHHHH
 }
+
+Ds ::= SEQUENCE { asd(0)}
 
 TestSeq ::= SEQUENCE {
   asd INTEGER,

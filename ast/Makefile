@@ -1,8 +1,10 @@
 AUXLIB_DIRS	= /usr/lib/ocaml/site-packages/deriving/lib
 OCAMLOPT	= ocamlopt.opt
-OCAMLC		= ocamlc.opt
+OCAMLC		= ocamlc.opt # -I +camlp4 camlp4lib.cma -pp camlp4orf
 OCAMLDEP	= ocamldep
 PATH		:= $(PATH):/usr/lib/ocaml/site-packages/deriving/syntax
+
+#USE_CAMLP4	= yes
 
 OCAMLFLAGS	= -w Aef
 YFLAGS		= -v
@@ -28,9 +30,11 @@ all: quirks byte-code ${RESULT}.cma
 quirks: oa_asn.cmi asn_parse.cmi
 
 test: all
-	./${RESULT} < 1.asn
-	./${RESULT} < 2.asn
-	./${RESULT} < ACP.asn
+	(cd test && \
+	../${RESULT} < 1.asn && \
+	../${RESULT} < 2.asn && \
+	../${RESULT} < ACP.asn && \
+	../${RESULT} < megaco-v1.asn)
 
 include $(OCAMLMAKEFILE)
 

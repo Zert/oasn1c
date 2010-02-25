@@ -79,6 +79,7 @@ NodeType ::= ENUMERATED
   agMgcp(4),
   mgMgcp(5),
   paSipt(6),
+  paTest(255),
   ...
 }
 
@@ -157,6 +158,7 @@ MediaEvent ::= CHOICE
   gateRegisterResp   [9] BOOLEAN,
   gateUnregister     [10] NULL,
   portEventInd       [11] PortEventType,
+  generateSignal     [12] SignalType,
   ...
 }
 
@@ -201,8 +203,8 @@ SDPEntry ::= SEQUENCE {name UTF8String, value UTF8String}
 ThroughconnectType ::= SEQUENCE
 {
   sessionID          [0] UTF8String,
-  localSDP           [1] SDPType,
-  remoteSDP          [2] SDPType,
+  localSDP           [1] SDPType OPTIONAL, --не устанавливается для mode = inactive
+  remoteSDP          [2] SDPType OPTIONAL, --не устанавливается для mode = inactive
   mode               [3] MediaMode,
   ...
 }
@@ -243,4 +245,35 @@ PortEventType ::= ENUMERATED
 
   ...
 }
+
+SignalType ::= SEQUENCE
+{
+  signal [0] Signals,
+  direction [1] SignalDirection DEFAULT external,
+  ...
+}
+
+Signals ::= ENUMERATED
+{
+  dialTone(0),
+  ringingTone(1),
+  busyTone(2),
+  congestionTone(3),
+  specialInformationTone(4),
+  warningTone(5),
+  payphoneRecognitionTone(6),
+  callWaitingTone(7),
+  callerWaitingTone(8),
+  payTone(9),
+  ...
+}
+
+SignalDirection ::= ENUMERATED
+{
+  external(0), -- направление сигнала по умолчанию, направление на физический порт/линию от MG
+  internal(1), -- направление сигнала ко всем терминация в контексте (в RTP)
+  both(2)      -- направление сигнала как в линию, так и к терминациям
+}
+
 END
+
