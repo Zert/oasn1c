@@ -12,6 +12,11 @@ subdirs	= ast lang main
 
 all: ${subdirs}
 
+test:
+	@list='${subdirs}'; for subdir in $$list; do \
+		${MAKE} -C $$subdir test; \
+	done;
+
 main: ast main
 	${MAKE} -C $@ all
 

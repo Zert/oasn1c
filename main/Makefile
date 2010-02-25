@@ -21,4 +21,6 @@ TRASH	= *~ *.cma ${RESULT}
 
 all: byte-code
 
+test:
+
 include $(OCAMLMAKEFILE)
