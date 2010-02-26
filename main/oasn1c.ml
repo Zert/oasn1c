@@ -8,9 +8,34 @@ let ast_op env result =
 	  flush stdout
 	end
 
+(* let _ = *)
+(*   try *)
+(* 	Oa_ast.parse_channel stdin ast_op [] *)
+(*   with Eof -> *)
+(* 	exit(0) *)
+
+
+(* let _ = *)
+(*   let ch = if Array.length Sys.argv > 1 then *)
+(* 	open_in Sys.argv.(1) *)
+(*   else *)
+(* 	stdin in *)
+(* 	try *)
+(* 	  Oa_ast.parse_channel ch Oa_ast.ast_op [] *)
+(* 	with Eof -> *)
+(* 	  exit(0) *)
+
+
+
 let _ =
-  try
-	Oa_ast.parse_channel stdin ast_op []
-  with Eof ->
-	exit(0)
+  let (fname, ch) = if Array.length Sys.argv > 1 then
+	(Sys.argv.(1), open_in Sys.argv.(1))
+  else
+	("<stdin>", stdin) in
+	try
+	  Oa_ast.parse_channel fname ch Oa_ast.ast_op []
+	with
+		Eof ->
+		  exit(0)
+	  | _ -> exit(1)
 

@@ -1,51 +1,30 @@
-(*pp deriving *)
-
-open Oa_asn;;
-open Show;;
+open Oa_ast;;
 
 exception Bad_lvalue;;
 
-(*
-let rec stringify r =
-  match r with
-	  Main (s, a) ->
-		Printf.sprintf "\nMain '%s': %s" s (stringify a)
-	| Body (a, al) ->
-		Printf.sprintf "Body:\n%s\n%s" (stringify a) (String.concat "" (List.map stringify al))
-	| Imports [] -> ""
-	| Imports i ->
-		Printf.sprintf "Imports:\n%s" (String.concat "" (List.map stringify i))
-	| ImportEntry (t, m) ->
-		Printf.sprintf "** Types `%s` from %s\n" (String.concat ", " t) m
-	| DefEntry (e, t) ->
-		Printf.sprintf "%s :: %s\n" e (stringify t)
-	| DefPlain (t, d) ->
-		Printf.sprintf "%s # %s\n" t (stringify d)
-	| DefSequence (t, d) ->
-		Printf.sprintf "%s #\n%s\n\n" t (String.concat "" (List.map stringify d))
-	| DefChoice (t, d) ->
-		Printf.sprintf "%s #\n%s\n\n" t (String.concat "" (List.map stringify d))
-	| DefinedType s ->
-		Printf.sprintf "<%s>" s
-	| Extent ->
-		Printf.sprintf "@ext@"
-	| Integer -> Printf.sprintf "Integer"
-	| IntegerRange (r1, r2) -> Printf.sprintf "Integer (%d..%d)" r1 r2
-	| _ -> Printf.sprintf "Unhandled "
- *)
+let ast_op env result =
+  let r = Oa_ast.dump_ast result in
+    begin
+	  Printf.printf "%s" r;
+	  print_string "\n_____\n";
+	  flush stdout
+	end
+
+(* let _ = *)
+(*   try *)
+(* 	Oa_ast.parse_channel stdin ast_op [] *)
+(*   with Eof -> *)
+(* 	exit(0) *)
+
 
 let _ =
-  try
-    let lexbuf = Lexing.from_channel stdin in
-      while true do
-        let result = Asn_parse.module_definition Asn_lex.token lexbuf in
-		let r = Show.show<Oa_asn.asn> result in
-          begin
-			Printf.printf "%s" r;
-			print_string "\n_____\n";
-			flush stdout
-		  end
-      done
-  with Asn_lex.Eof ->
-    exit 0
-
+  let (fname, ch) = if Array.length Sys.argv > 1 then
+	(Sys.argv.(1), open_in Sys.argv.(1))
+  else
+	("<stdin>", stdin) in
+	try
+	  Oa_ast.parse_channel fname ch Oa_ast.ast_op []
+	with
+		Eof ->
+		  exit(0)
+	  | _ -> exit(1)
