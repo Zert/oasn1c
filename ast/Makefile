@@ -9,13 +9,13 @@ PATH		:= $(PATH):/usr/lib/ocaml/site-packages/deriving/syntax
 OCAMLFLAGS	= -w Aef
 YFLAGS		= -v
 
-SOURCES = asn_lex.mll \
+SOURCES = oa_asn.ml \
+          asn_lex.mll \
           asn_parse.mly \
-          oa_asn.ml \
           oa_ast.ml \
           oa_main.ml
 
-LIBS    = nums deriving
+LIBS    = deriving
 LIB_NAME	= oa_ast
 RESULT  = ${LIB_NAME}
 CLIBS 	=
@@ -31,10 +31,10 @@ quirks: oa_asn.cmi asn_parse.cmi
 
 test: all
 	(cd test && \
-	../${RESULT} < 1.asn && \
-	../${RESULT} < 2.asn && \
-	../${RESULT} < ACP.asn && \
-	../${RESULT} < megaco-v1.asn)
+	../${RESULT} 1.asn && \
+	../${RESULT} 2.asn && \
+	../${RESULT} ACP.asn && \
+	../${RESULT} megaco-v1.asn)
 
 include $(OCAMLMAKEFILE)
 
