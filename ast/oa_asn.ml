@@ -4,6 +4,8 @@
 perl -ne 'if (m/\{ ([A-Z][a-zA-Z0-9]+) \}/) { print "$1\n" } elsif (m/\{ ([A-Z][a-zA-Z0-9]+) (\(.*?\)) \}/) {$l = scalar(split(",", $2)); $d = join(" * ", ("asn", "asn", "asn", "asn", "asn", "asn", "asn", "asn")[1..$l]);print "$1 of ( $d )\n"}' asn_parse.mly
  *)
 
+exception ParsingError of (string * int * int * int);;
+
 type asn =
 	Main of (asn * asn * asn * asn)
   | Body of (asn * asn * asn list)
