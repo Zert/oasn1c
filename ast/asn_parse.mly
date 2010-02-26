@@ -2,7 +2,6 @@
   open Oa_asn;;
   open Lexing;;
 
-  exception ParsingError of int;;
 
   let db str ret =
 	begin
@@ -11,19 +10,15 @@
 	end;;
 
   let parse_error s =
-	print_endline "Parse error";
-	print_endline s;
+	Printf.fprintf stdout "\n***Error***\n";
 	flush stdout;;
-
-  let where_is_error env = Printf.fprintf stderr "Parser env\n";;
 
   let error_handler expl =
 	let sp = Parsing.symbol_start_pos () in
 	let ep = Parsing.symbol_end_pos () in
 	  begin
 		let fname = if sp.pos_fname = "" then "<stdin>" else sp.pos_fname in
-		  Printf.fprintf stderr "%s:%d:%d-%d error: %s\n" fname sp.pos_lnum (sp.pos_cnum - sp.pos_bol) (ep.pos_cnum - ep.pos_bol) expl;
-		  raise (ParsingError(Parsing.symbol_start ()))
+		  raise (Oa_asn.ParsingError(expl, sp.pos_lnum, (sp.pos_cnum - sp.pos_bol), (ep.pos_cnum - ep.pos_bol)))
 	  end
 
 %}
@@ -158,7 +153,7 @@ defined_type:
 | NAME                            { TypeRef ($1) }
 /*| parameterized_type              { ParamType ($1) }
 | parameterized_value_set_type    { ParamValSetType ($1) }*/
-| error                           { error_handler "Incorrect defined type" }
+| error                           { error_handler "Incorrect type definition" }
 ;
 
 /*
@@ -260,6 +255,7 @@ asn_type:
   builtin_type           { TypeBuiltin ($1) }
 | referenced_type        { TypeReferenced ($1) }
 | constrained_type       { TypeConstrained ($1) }
+| error                  { error_handler "Not a ASN.1 type" }
 ;
 
 constrained_type:
@@ -545,12 +541,23 @@ octet_string_type:
 real_type:
   REAL                   { RealType }
 ;
-sequence_type:
+/*sequence_type:
   SEQUENCE LBRACE RBRACE                       { SequenceType (Empty, Empty) }
 | SEQUENCE LBRACE component_type_lists RBRACE  { SequenceTypeComp ($3, Empty) }
 | SEQUENCE LBRACE extension_and_exception
 	  optional_extension_marker RBRACE         { SequenceTypeExt ($3, $4) }
+| error                                        { error_handler "Incorrect SEQUENCE type definition" }
+;*/
+sequence_type:
+  SEQUENCE LBRACE sequence_definition RBRACE   { SequenceType ( $3 ) }
+| error                                        { error_handler "Incorrect SEQUENCE type" }
 ;
+sequence_definition:
+  /* empty */                                        { (Empty, Empty) }
+| component_type_lists                               { ($1, Empty) }
+| extension_and_exception optional_extension_marker  { ($1, $2) }
+| error                                              { error_handler "Incorrect SEQUENCE type definition" }
+
 object_identifier_type:
   OBJECT IDENTIFIER               { Empty } /* FIXME */
 ;
