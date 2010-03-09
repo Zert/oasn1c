@@ -21,6 +21,17 @@
 		  raise (Oa_asn.ParsingError(expl, sp.pos_lnum, (sp.pos_cnum - sp.pos_bol), (ep.pos_cnum - ep.pos_bol)))
 	  end
 
+  let convert_rangelim rl =
+	try
+	  let i = Int64.of_string(rl) in
+		Integer (i)
+	with
+		Failure "int_of_string" -> Value (rl)
+
+  let convert_range r =
+	match r with
+		(l1, l2) -> (convert_rangelim l1, convert_rangelim l2)
+
 %}
 
 /*
@@ -39,7 +50,7 @@ valuereference - IDENT
 %token <string> CSTRING
 %token <int64> NUMBER
 %token <float> REALNUMBER
-%token <int64 * int64> RANGE
+%token <string * string> RANGERAW
 
 /* Reserved words */
 %token ABSENT ABSTRACT_SYNTAX ALL APPLICATION AUTOMATIC BEGIN BIT BMPString BOOLEAN BY
@@ -287,8 +298,12 @@ size_constraint:
 /*  SIZE asn_constraint         { ConstraintSize ($2) } */
 | SIZE value_range            { ConstraintSize ($2) }
 ;
-value_range:
+
+/*value_range:
   lower_endpoint RANGESEP upper_endpoint   { ValueRange ($1, $3) }
+;*/
+value_range:
+ RANGE         { $1 }
 ;
 lower_endpoint:
   lower_end_value          { LowerEndVal ($1) }
@@ -448,10 +463,10 @@ boolean_type:
 ;
 character_string_type:
   restricted_character_string_type    { String ($1, Empty) }
-| restricted_character_string_type LPAREN SIZE RANGE RPAREN    { String ($1, Size (Range($4))) }
+| restricted_character_string_type LPAREN SIZE RANGE RPAREN    { String ($1, Size ($4)) }
 | restricted_character_string_type LPAREN SIZE LPAREN NUMBER RPAREN RPAREN    { String ($1, Size (Integer($5))) }
 | unrestricted_character_string_type  { String ($1, Empty) }
-| unrestricted_character_string_type LPAREN SIZE RANGE RPAREN    { String ($1, Size (Range($4))) }
+| unrestricted_character_string_type LPAREN SIZE RANGE RPAREN    { String ($1, Size ($4)) }
 | unrestricted_character_string_type LPAREN SIZE LPAREN NUMBER RPAREN RPAREN    { String ($1, Size (Integer($5))) }
 ;
 restricted_character_string_type:
@@ -516,7 +531,7 @@ external_type:
 ;
 integer_type:
   INTEGER                                  { IntegerType (Empty) }
-| INTEGER RANGE                            { IntegerType (Range($2)) }
+| INTEGER RANGE                            { IntegerType ($2) }
 | INTEGER LBRACE named_number_list RBRACE  { IntegerType (NamedNumberList($3)) }
 ;
 named_number_list:
@@ -535,8 +550,9 @@ null_type:
 ;
 octet_string_type:
   OCTET STRING                           { OctetStringType (Empty) }
-| OCTET STRING LPAREN SIZE RANGE RPAREN  { OctetStringType (Size (Range($5))) }
+| OCTET STRING LPAREN SIZE RANGE RPAREN  { OctetStringType (Size ($5)) }
 | OCTET STRING LPAREN SIZE LPAREN NUMBER RPAREN RPAREN  { OctetStringType (Size (Integer($6))) }
+| OCTET STRING LPAREN SIZE LPAREN IDENT RPAREN RPAREN  { OctetStringType (Size (Value($6))) }
 ;
 real_type:
   REAL                   { RealType }
@@ -849,3 +865,11 @@ parameter_list:
 named_value:
   IDENT asn_value                        { NamedValue ($1, $2) }
 ;
+RANGE:
+  LPAREN RANGERAW RPAREN     { Range (convert_range $2) }
+| LPAREN IDENT RANGESEP IDENT RPAREN      { Range (Value ($2), Value ($4)) }
+| LPAREN IDENT RANGESEP NUMBER RPAREN     { Range (Value ($2), Integer ($4)) }
+| LPAREN NUMBER RANGESEP IDENT RPAREN     { Range (Integer ($2), Value ($4)) }
+| LPAREN NUMBER RANGESEP NUMBER RPAREN    { Range (Integer ($2), Integer ($4)) }
+;
+

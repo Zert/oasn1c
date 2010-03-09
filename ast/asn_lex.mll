@@ -118,8 +118,9 @@ let typereference = ( uppercase (ordsym|hyphen)* ordsym* )
 let identifier = ( lowercase (ordsym|hyphen) ordsym* )
 let valuereference = identifier
 let modulereference = typereference
-let number = ('0'|(['1'-'9']digit*))
-let realnumber = (digit+ (('.'?)|('.'digit+)))
+let number = ('-'?('0'|(['1'-'9']digit*)))
+let realnumber = (digit+ ('.'digit+))
+let rangelim = (number|identifier)
 let bstring = ('\'' ('0'|'1'|' ')* '\'' 'B')
 let hstring = ('\'' (['A'-'F' '0'-'9' ' ']*) '\'' 'H')
   (* add cstring *)
@@ -143,6 +144,7 @@ let rvbrack = "]]"
 								  with Not_found ->
 									db ("NAME: " ^ (Lexing.lexeme lexbuf))  (NAME t) }
 	| identifier as i           { db ("IDENT: " ^ (Lexing.lexeme lexbuf)) (IDENT i) }
+	| rangesep                  { db "Rangesep" RANGESEP }
 	| number as n               { db ("NUMBER: " ^ (Lexing.lexeme lexbuf)) (NUMBER (string_to_int n)) }
 	| realnumber as r           { db ("REALNUMBER: " ^ (Lexing.lexeme lexbuf)) (REALNUMBER (float_of_string r)) }
 	| bstring as b              { db ("BSTRING: " ^ (Lexing.lexeme lexbuf)) (BSTRING b) }
@@ -160,8 +162,6 @@ let rvbrack = "]]"
 	| '@'                       { db "AT" AT }
 	| '*'                       { db "STAR" STAR }
 	| '.'                       { db "DOT" DOT }
-	| '(' (digit+ as r1) rangesep (digit+ as r2) ')'   { db "RANGE" (RANGE ((string_to_int r1), (string_to_int r2))) }
-	| rangesep                  { db "Rangesep" RANGESEP }
 	| '('                       { db "LPAREN" LPAREN }
 	| ')'                       { db "RPAREN" RPAREN }
 	| "[["                      { db "LDSQBRACE" LDSQBRACE }

@@ -119,7 +119,7 @@ type asn =
   | PlusInfinity
   | PrintableString
   | Quadruple of ( int64 * int64 * int64 * int64 )
-  | Range of ( int64 * int64 )
+  | Range of ( asn * asn )
   | RealType
   | Real of ( float )
   | Ref of ( string )
