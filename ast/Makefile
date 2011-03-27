@@ -29,12 +29,18 @@ all: quirks byte-code ${RESULT}.cma
 
 quirks: oa_asn.cmi asn_parse.cmi
 
-test: all
+test: all test-ok test-fail
+
+test-ok:
 	(cd test && \
 	../${RESULT} 1.asn && \
-	../${RESULT} 2.asn && \
 	../${RESULT} ACP.asn && \
 	../${RESULT} megaco-v1.asn)
+
+test-fail:
+	(cd test && \
+	../${RESULT} 2.asn)
+
 
 include $(OCAMLMAKEFILE)
 
